@@ -1,0 +1,55 @@
+{
+    "name": "lloc/seo",
+    "description": "Library for SEO related scripts & functionalities in WordPress websites",
+    "type": "library",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Dennis Ploetner",
+            "email": "re@lloc.de",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "lloc\\SEO\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "lloc\\SEOTests\\": "tests/"
+        }
+    },
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=8.1"
+    },
+    "require-dev": {
+        "brain/monkey": "^2.6",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^9.6",
+        "roots/wordpress-no-content": "^7.1",
+        "squizlabs/php_codesniffer": "^3.0",
+        "szepeviktor/phpstan-wordpress": "^2.0",
+        "wp-coding-standards/wpcs": "^3.4",
+        "phpstan/extension-installer": "^1.4"
+    },
+    "scripts": {
+        "tests": "./vendor/bin/phpunit -c ./phpunit.xml.dist",
+        "tests:coverage": "XDEBUG_MODE=coverage ./vendor/bin/phpunit -c ./phpunit.xml.dist --coverage-html ./tests/coverage",
+        "cs": "./vendor/bin/phpcs .",
+        "cs:fix": "./vendor/bin/phpcbf .",
+        "phpstan": "./vendor/bin/phpstan analyse --memory-limit=1G",
+        "qa": [
+            "@cs",
+            "@phpstan"
+        ]
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true
+        }
+    }
+}
