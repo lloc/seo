@@ -1,4 +1,4 @@
-.phpcs.cache
-.phpunit.result.cache
+.phpcs.cache/
+.phpunit.cache/
 composer.lock
 vendor/
