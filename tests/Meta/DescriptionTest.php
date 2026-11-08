@@ -28,14 +28,7 @@ final class DescriptionTest extends TestCase {
 		parent::tearDown();
 	}
 
-	private function front_page( string $tagline ): void {
-		Functions\when( 'is_front_page' )->justReturn( true );
-		Functions\when( 'get_bloginfo' )->justReturn( $tagline );
-		Functions\when( 'wp_strip_all_tags' )->alias( 'strip_tags' );
-	}
-
-	private function other_page( $filtered ): void {
-		Functions\when( 'is_front_page' )->justReturn( false );
+	private function filtered( $filtered ): void {
 		Functions\when( 'get_queried_object_id' )->justReturn( 42 );
 		Filters\expectApplied( Description::META_DESCRIPTION_FILTER )
 			->with( '', 42 )
@@ -66,34 +59,12 @@ final class DescriptionTest extends TestCase {
 		$this->assertSame( $priority, $has( $hook, array( $test, $method ) ) );
 	}
 
-	public static function tagline_provider(): array {
-		return array(
-			'plain'   => array( 'Just another site', 'Just another site' ),
-			'trimmed' => array( '  Just another site ', 'Just another site' ),
-			'tags'    => array( '<b>Just another site</b>', 'Just another site' ),
-			'empty'   => array( '', '' ),
-		);
-	}
-
-	/**
-	 * @dataProvider tagline_provider
-	 *
-	 * @param string $tagline
-	 * @param string $expected
-	 */
-	public function test_description_front_page( string $tagline, string $expected ): void {
-		$this->front_page( $tagline );
-
-		$this->assertSame( $expected, ( new Description() )->description() );
-	}
-
 	public static function filtered_provider(): array {
 		return array(
 			'string' => array( 'Legal notice', 'Legal notice' ),
 			'empty'  => array( '', '' ),
-			'array'  => array( array( 'nope' ), '' ),
 			'null'   => array( null, '' ),
-			'int'    => array( 42, '' ),
+			'int'    => array( 42, '42' ),
 		);
 	}
 
@@ -103,8 +74,8 @@ final class DescriptionTest extends TestCase {
 	 * @param mixed  $filtered
 	 * @param string $expected
 	 */
-	public function test_description_other_page( $filtered, string $expected ): void {
-		$this->other_page( $filtered );
+	public function test_description( $filtered, string $expected ): void {
+		$this->filtered( $filtered );
 
 		$this->assertSame( $expected, ( new Description() )->description() );
 	}
@@ -128,26 +99,26 @@ final class DescriptionTest extends TestCase {
 	 * @param mixed  $expected
 	 */
 	public function test_fill( $yoast, string $ours, $expected ): void {
-		$this->other_page( $ours );
+		$this->filtered( $ours );
 
 		$this->assertSame( $expected, ( new Description() )->fill( $yoast ) );
 	}
 
 	public static function render_provider(): array {
 		return array(
-			'tagline' => array( 'Tagline', '<meta name="description" content="Tagline" />' . PHP_EOL ),
-			'empty'   => array( '', '' ),
+			'filtered' => array( 'Legal notice', '<meta name="description" content="Legal notice" />' . PHP_EOL ),
+			'empty'    => array( '', '' ),
 		);
 	}
 
 	/**
 	 * @dataProvider render_provider
 	 *
-	 * @param string $tagline
+	 * @param string $filtered
 	 * @param string $expected
 	 */
-	public function test_render( string $tagline, string $expected ): void {
-		$this->front_page( $tagline );
+	public function test_render( string $filtered, string $expected ): void {
+		$this->filtered( $filtered );
 
 		$this->expectOutputString( $expected );
 		( new Description() )->render();

@@ -18,8 +18,7 @@ use lloc\SEO\Helper\Plugins;
  */
 class Description {
 
-
-	const META_DESCRIPTION_FILTER = 'lloc_seo_meta_description';
+	public const META_DESCRIPTION_FILTER = 'lloc_seo_meta_description';
 
 	/**
 	 * Hook into wp_head.
@@ -78,18 +77,21 @@ class Description {
 	 * @return string
 	 */
 	public function description(): string {
-		if ( is_front_page() ) {
-			return trim( wp_strip_all_tags( (string) get_bloginfo( 'description' ) ) );
-		}
-
 		$queried_object_id = get_queried_object_id();
 
+		/**
+		 * Filter the meta description for the current page.
+		 *
+		 * @param string $description        The meta description for the current page.
+		 * @param int    $queried_object_id  The ID of the queried object.
+		 * @return string
+		 */
 		$description = apply_filters(
 			self::META_DESCRIPTION_FILTER,
 			'',
 			$queried_object_id
 		);
 
-		return is_string( $description ) ? esc_attr( $description ) : '';
+		return esc_attr( (string) $description );
 	}
 }
