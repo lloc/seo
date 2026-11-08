@@ -69,6 +69,10 @@ class Description {
 			'<meta name="description" content="%s" />' . PHP_EOL,
 			esc_attr( $content )
 		);
+		printf(
+			'<meta property="og:description" content="%s">' . PHP_EOL,
+			esc_attr( $content )
+		);
 	}
 
 	/**
