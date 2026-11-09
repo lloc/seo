@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace lloc\SEO\Meta;
 
 use lloc\SEO\Helper\Plugins;
+use lloc\SEO\Meta\Meta;
 
 /**
  * Class Description
@@ -21,8 +22,7 @@ class Description extends Meta {
 	public const META_DESCRIPTION_FILTER = 'lloc_seo_meta_description';
 
 	/**
-	 * Register hooks.
-	 *
+	 * @inheritdoc
 	 * @return void
 	 */
 	public function register(): void {
