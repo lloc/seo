@@ -82,8 +82,7 @@ class Image implements Registerable {
 	 * @return array{url: string, width: int|string, height: int|string, type: string}
 	 */
 	public function value(): array {
-		$queried_object_id = get_queried_object_id();
-		$defaults          = array(
+		$defaults = array(
 			'url'    => '',
 			'width'  => 0,
 			'height' => 0,
@@ -100,7 +99,7 @@ class Image implements Registerable {
 		$image = apply_filters(
 			self::META_IMAGE_FILTER,
 			$defaults,
-			$queried_object_id
+			get_queried_object_id()
 		);
 
 		return wp_parse_args( $image, $defaults ); // @phpstan-ignore return.type
