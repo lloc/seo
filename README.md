@@ -10,11 +10,10 @@ leaves sites without an SEO plugin with empty tags.
 
 This library handles both cases. You provide the values through filters, and the library decides where they go:
 
-- **No SEO plugin active:** it prints the tags itself (`<title>`, `og:title`, `meta description`, `og:description`, `og:image`).
+- **No SEO plugin active:** it sets the `<title>` and prints `og:title`, `meta description`, `og:description`
+  and `og:image`.
 - **SEO plugin active:** it prints nothing. Instead it hands your values to the plugin where it has none,
-  and keeps values an editor has set in the plugin. How much is covered differs per plugin, see below.
-
-Detected SEO plugins: Yoast SEO, Rank Math, All in One SEO, SEOPress, The SEO Framework.
+  and keeps values an editor has set in the plugin. See [SEO plugin support](#seo-plugin-support).
 
 It also has a helper that removes tags WordPress puts in the `<head>` by default but that most sites don't need.
 
@@ -59,15 +58,8 @@ add_filter( 'lloc_seo_meta_title', function ( string $title, int $object_id ): s
 }, 10, 2 );
 ```
 
-- Without an SEO plugin, the value replaces the document title (`pre_get_document_title`)
-  and is printed as `<meta property="og:title">` in `wp_head`.
-- With Yoast, it is used for `wpseo_title` and `wpseo_opengraph_title` when Yoast has no value.
-- With Rank Math, it is used for `rank_math/frontend/title`, `rank_math/opengraph/facebook/og_title`
-  and `rank_math/opengraph/twitter/twitter_title` when Rank Math has no value.
-- With All in One SEO or SEOPress, it is used for `aioseo_title` or `seopress_titles_title`
-  when the plugin has no value (title tag only, not Open Graph).
-- With The SEO Framework, it is used for `the_seo_framework_title_from_custom_field` when no custom title is set.
-  The SEO Framework also uses it for `og:title` and `twitter:title` unless those are set separately.
+Without an SEO plugin, the value replaces the document title (`pre_get_document_title`, needs
+`add_theme_support( 'title-tag' )`) and is printed as `<meta property="og:title">` in `wp_head`.
 
 ### Description
 
@@ -79,15 +71,7 @@ add_filter( 'lloc_seo_meta_description', function ( string $description, int $ob
 }, 10, 2 );
 ```
 
-- Without an SEO plugin, it prints `<meta name="description">` and `<meta property="og:description">` in `wp_head`.
-- With Yoast, it is used for `wpseo_metadesc`, `wpseo_opengraph_desc` and `wpseo_twitter_description`
-  when Yoast has no value.
-- With Rank Math, it is used for `rank_math/frontend/description`, `rank_math/opengraph/facebook/og_description`
-  and `rank_math/opengraph/twitter/twitter_description` when Rank Math has no value.
-- With All in One SEO or SEOPress, it is used for `aioseo_description` or `seopress_titles_desc`
-  when the plugin has no value (meta description only, not Open Graph).
-- With The SEO Framework, it is used for `the_seo_framework_custom_field_description` when no custom description
-  is set. The SEO Framework also uses it for `og:description` and `twitter:description` unless those are set separately.
+Without an SEO plugin, it prints `<meta name="description">` and `<meta property="og:description">` in `wp_head`.
 
 ### Share image
 
@@ -114,10 +98,26 @@ add_filter( 'lloc_seo_meta_image', function ( array $image, int $object_id ): ar
 }, 10, 2 );
 ```
 
-- Without an SEO plugin, it prints `og:image`, `og:image:width` and `og:image:height` in `wp_head`.
-- With Yoast, the image is added via `wpseo_add_opengraph_images` when Yoast has no image for the page.
-- With Rank Math, the image is added via `rank_math/opengraph/{facebook,twitter}/add_additional_images`
-  when Rank Math has no image for the page.
+Without an SEO plugin, it prints `og:image`, `og:image:width` and `og:image:height` in `wp_head`.
+
+### SEO plugin support
+
+With an SEO plugin active, the library prints nothing and passes your values to the plugin's own filters
+instead. A value the plugin already has (set by an editor or generated from the plugin's templates) is kept,
+so your value only fills gaps.
+
+| Plugin | Title | Description | Image |
+|---|---|---|---|
+| Yoast SEO | title, `og:title` | description, `og:description`, `twitter:description` | `og:image` |
+| Rank Math | title, `og:title`, `twitter:title` | description, `og:description`, `twitter:description` | `og:image`, `twitter:image` |
+| All in One SEO | title | description | – |
+| SEOPress | title | description | – |
+| The SEO Framework | title, `og:title`, `twitter:title` | description, `og:description`, `twitter:description` | – |
+
+The hooks are listed in the `SEO_PLUGIN_FILTER` constants of `Title`, `Description` and `Image`, except for
+The SEO Framework, which is registered separately in `register()`. For The SEO Framework the library uses its
+custom-field filters, so your value replaces the generated one; its social tags fall back to it unless they are
+set separately.
 
 ### Clean up the head
 
