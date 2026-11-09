@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace lloc\SEO\Meta;
 
+use lloc\SEO\Helper\Plugins;
+
 final class Title extends Information implements Registerable {
 
 
@@ -21,6 +23,18 @@ final class Title extends Information implements Registerable {
 	public function register(): void {
 		add_filter( 'wpseo_title', array( $this, 'fill' ) );
 		add_filter( 'wpseo_opengraph_title', array( $this, 'fill' ) );
+		add_filter( 'pre_get_document_title', array( $this, 'document_title' ) );
+	}
+
+	/**
+	 * Document title when no SEO plugin sets it.
+	 *
+	 * @param mixed $title Title so far, '' lets WordPress build it.
+	 *
+	 * @return mixed
+	 */
+	public function document_title( $title ) {
+		return Plugins::active() ? $title : $this->fill( $title );
 	}
 
 	/**

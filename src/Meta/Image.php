@@ -22,13 +22,6 @@ class Image implements Registerable {
 
 	public const RENDER_PRIORITY = 2;
 
-	public function __construct(
-		protected string $url,
-		protected int $width,
-		protected int $height,
-		protected string $type
-	) {}
-
 	/**
 	 * @inheritdoc
 	 * @return void
@@ -47,10 +40,7 @@ class Image implements Registerable {
 	 * @return void
 	 */
 	public function add_yoast_image( $images ): void {
-		$post_object = get_queried_object();
-		$post_name   = $post_object instanceof \WP_Post ? $post_object->post_name : '';
-
-		if ( '' === $post_name || ! method_exists( $images, 'add_image' ) ) {
+		if ( ! method_exists( $images, 'add_image' ) ) {
 			return;
 		}
 
@@ -58,14 +48,12 @@ class Image implements Registerable {
 			return;
 		}
 
-		$images->add_image(
-			array(
-				'url'    => $this->url,
-				'width'  => $this->width,
-				'height' => $this->height,
-				'type'   => $this->type,
-			)
-		);
+		$image = $this->value();
+		if ( '' === $image['url'] ) {
+			return;
+		}
+
+		$images->add_image( $image );
 	}
 
 	/**
@@ -78,8 +66,43 @@ class Image implements Registerable {
 			return;
 		}
 
-		printf( '<meta property="og:image" content="%s" />' . PHP_EOL, esc_url( $this->url ) );
-		printf( '<meta property="og:image:width" content="%d" />' . PHP_EOL, esc_attr( strval( $this->width ) ) );
-		printf( '<meta property="og:image:height" content="%d" />' . PHP_EOL, esc_attr( strval( $this->height ) ) );
+		$image = $this->value();
+		if ( '' === $image['url'] ) {
+			return;
+		}
+
+		printf( '<meta property="og:image" content="%s" />' . PHP_EOL, esc_url( $image['url'] ) );
+		printf( '<meta property="og:image:width" content="%d" />' . PHP_EOL, esc_attr( strval( $image['width'] ) ) );
+		printf( '<meta property="og:image:height" content="%d" />' . PHP_EOL, esc_attr( strval( $image['height'] ) ) );
+	}
+
+	/**
+	 * Image for the current page.
+	 *
+	 * @return array{url: string, width: int|string, height: int|string, type: string}
+	 */
+	public function value(): array {
+		$queried_object_id = get_queried_object_id();
+		$defaults          = array(
+			'url'    => '',
+			'width'  => 0,
+			'height' => 0,
+			'type'   => '',
+		);
+
+		/**
+		 * Filter the meta image for the current page.
+		 *
+		 * @param array{url: string, width: int|string, height: int|string, type: string} $image Share image, an empty url means no image.
+		 * @param int $queried_object_id The ID of the queried object.
+		 * @return array{url: string, width: int|string, height: int|string, type: string}
+		 */
+		$image = apply_filters(
+			self::META_IMAGE_FILTER,
+			$defaults,
+			$queried_object_id
+		);
+
+		return wp_parse_args( $image, $defaults ); // @phpstan-ignore return.type
 	}
 }

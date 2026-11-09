@@ -54,6 +54,29 @@ final class TitleTest extends TestCase {
 		$this->assertSame( 10, has_filter( $hook, array( $test, 'fill' ) ) );
 	}
 
+	public function test_register_adds_document_title_hook(): void {
+		$test = new Title();
+		$test->register();
+
+		$this->assertSame( 10, has_filter( 'pre_get_document_title', array( $test, 'document_title' ) ) );
+	}
+
+	public function test_document_title(): void {
+		$this->filtered( 'Ours' );
+
+		$this->assertSame( 'Ours', ( new Title() )->document_title( '' ) );
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState  disabled
+	 */
+	public function test_document_title_untouched_with_seo_plugin(): void {
+		define( 'WPSEO_VERSION', '1.0' );
+
+		$this->assertSame( '', ( new Title() )->document_title( '' ) );
+	}
+
 	public static function filtered_provider(): array {
 		return array(
 			'string' => array( 'Impressum', 'Impressum' ),
