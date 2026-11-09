@@ -1,6 +1,6 @@
 <?php
 /**
- * Meta title for page.
+ * Meta title for post types.
  *
  * @package SEO
  */
@@ -9,9 +9,7 @@ declare(strict_types=1);
 
 namespace lloc\SEO\Meta;
 
-use lloc\SEO\Meta\Meta;
-
-final class Title extends Meta {
+final class Title extends Information implements Registerable {
 
 
 	public const META_TITLE_FILTER = 'lloc_seo_meta_title';

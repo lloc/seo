@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace lloc\SEO\Meta;
 
-abstract class Meta {
+abstract class Information {
 
 	/**
 	 * Register hooks.

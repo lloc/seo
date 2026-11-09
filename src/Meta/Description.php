@@ -1,6 +1,6 @@
 <?php
 /**
- * Meta description for page.
+ * Meta description for post types.
  *
  * @package SEO
  */
@@ -10,23 +10,24 @@ declare(strict_types=1);
 namespace lloc\SEO\Meta;
 
 use lloc\SEO\Helper\Plugins;
-use lloc\SEO\Meta\Meta;
 
 /**
  * Class Description
  *
  * @package SEO
  */
-class Description extends Meta {
+class Description extends Information implements Registerable {
 
 	public const META_DESCRIPTION_FILTER = 'lloc_seo_meta_description';
+
+	public const RENDER_PRIORITY = 1;
 
 	/**
 	 * @inheritdoc
 	 * @return void
 	 */
 	public function register(): void {
-		add_action( 'wp_head', array( $this, 'render' ), 1 );
+		add_action( 'wp_head', array( $this, 'render' ), self::RENDER_PRIORITY );
 
 		add_filter( 'wpseo_metadesc', array( $this, 'fill' ) );
 		add_filter( 'wpseo_opengraph_desc', array( $this, 'fill' ) );
