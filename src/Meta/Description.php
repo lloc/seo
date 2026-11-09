@@ -16,12 +16,12 @@ use lloc\SEO\Helper\Plugins;
  *
  * @package SEO
  */
-class Description {
+class Description extends Meta {
 
 	public const META_DESCRIPTION_FILTER = 'lloc_seo_meta_description';
 
 	/**
-	 * Hook into wp_head.
+	 * Register hooks.
 	 *
 	 * @return void
 	 */
@@ -34,23 +34,6 @@ class Description {
 	}
 
 	/**
-	 * Yoast filter: keep a description set in Yoast, otherwise use ours.
-	 *
-	 * @param mixed $description Description from Yoast.
-	 *
-	 * @return mixed
-	 */
-	public function fill( $description ) {
-		if ( is_string( $description ) && '' !== trim( $description ) ) {
-			return $description;
-		}
-
-		$content = $this->description();
-
-		return '' !== $content ? $content : $description;
-	}
-
-	/**
 	 * Print the tag when applicable.
 	 *
 	 * @return void
@@ -60,7 +43,7 @@ class Description {
 			return;
 		}
 
-		$content = $this->description();
+		$content = $this->value();
 		if ( '' === $content ) {
 			return;
 		}
@@ -70,7 +53,7 @@ class Description {
 			esc_attr( $content )
 		);
 		printf(
-			'<meta property="og:description" content="%s">' . PHP_EOL,
+			'<meta property="og:description" content="%s" />' . PHP_EOL,
 			esc_attr( $content )
 		);
 	}
@@ -80,7 +63,7 @@ class Description {
 	 *
 	 * @return string
 	 */
-	public function description(): string {
+	public function value(): string {
 		$queried_object_id = get_queried_object_id();
 
 		/**

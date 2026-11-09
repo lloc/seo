@@ -74,10 +74,10 @@ final class DescriptionTest extends TestCase {
 	 * @param mixed  $filtered
 	 * @param string $expected
 	 */
-	public function test_description( $filtered, string $expected ): void {
+	public function test_value( $filtered, string $expected ): void {
 		$this->filtered( $filtered );
 
-		$this->assertSame( $expected, ( new Description() )->description() );
+		$this->assertSame( $expected, ( new Description() )->value() );
 	}
 
 	public static function fill_provider(): array {
@@ -106,7 +106,7 @@ final class DescriptionTest extends TestCase {
 
 	public static function render_provider(): array {
 		return array(
-			'filtered' => array( 'Legal notice', '<meta name="description" content="Legal notice" />' . PHP_EOL ),
+			'filtered' => array( 'Legal notice', '<meta name="description" content="Legal notice" />' . PHP_EOL . '<meta property="og:description" content="Legal notice" />' . PHP_EOL ),
 			'empty'    => array( '', '' ),
 		);
 	}
