@@ -12,7 +12,12 @@ namespace lloc\SEO\Utils;
 final class CleanUp {
 
 	/**
-	 * Remove unnecessary tags from the head.
+	 * Remove unnecessary tags from the head:
+	 *
+	 * - RSD link (points at xmlrpc.php),
+	 * - Windows Live Writer manifest link,
+	 * - WordPress version in the generator tag and in feeds,
+	 * - emoji detection script and styles (front end and admin).
 	 *
 	 * @return void
 	 */
