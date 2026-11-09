@@ -112,6 +112,7 @@ final class ImageTest extends TestCase {
 	public static function render_provider(): array {
 		return array(
 			'filtered' => array( self::IMAGE, '<meta property="og:image" content="https://example.com/share.png" />' . PHP_EOL . '<meta property="og:image:width" content="1200" />' . PHP_EOL . '<meta property="og:image:height" content="630" />' . PHP_EOL ),
+			'url only' => array( array( 'url' => 'https://example.com/a.jpg' ), '<meta property="og:image" content="https://example.com/a.jpg" />' . PHP_EOL ),
 			'empty'    => array( array(), '' ),
 		);
 	}

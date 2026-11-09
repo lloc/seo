@@ -12,18 +12,29 @@ namespace lloc\SEO\Meta;
 abstract class Information {
 
 	/**
-	 * Register hooks.
+	 * Name of the filter that provides the value.
 	 *
-	 * @return void
+	 * @return non-empty-string
 	 */
-	abstract public function register(): void;
+	abstract protected function filter(): string;
 
 	/**
-	 * Get the value for the meta information.
+	 * Value for the current page.
 	 *
 	 * @return string
 	 */
-	abstract public function value(): string;
+	public function value(): string {
+		/**
+		 * Filter the meta title or description for the current page.
+		 *
+		 * @param string $value             The value for the current page.
+		 * @param int    $queried_object_id The ID of the queried object.
+		 * @return string
+		 */
+		$value = apply_filters( $this->filter(), '', get_queried_object_id() );
+
+		return esc_attr( (string) $value );
+	}
 
 	/**
 	 * Filter values, non empty values are preserved.

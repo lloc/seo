@@ -35,12 +35,9 @@ final class Title extends Information implements Registerable {
 	public function register(): void {
 		add_action( 'wp_head', array( $this, 'render' ), self::RENDER_PRIORITY );
 
-		array_map(
-			function ( $filter ) {
-				add_filter( $filter, array( $this, 'fill' ) );
-			},
-			self::SEO_PLUGIN_FILTER
-		);
+		foreach ( self::SEO_PLUGIN_FILTER as $hook ) {
+			add_filter( $hook, array( $this, 'fill' ) );
+		}
 
 		// The SEO Framework passes $args when it asks for another object.
 		add_filter( 'the_seo_framework_title_from_custom_field', array( $this, 'fill_current' ), 10, 2 );
@@ -81,26 +78,9 @@ final class Title extends Information implements Registerable {
 	}
 
 	/**
-	 * Title for the current page.
-	 *
-	 * @return string
+	 * @inheritdoc
 	 */
-	public function value(): string {
-		$queried_object_id = get_queried_object_id();
-
-		/**
-		 * Filter the meta title for the current page.
-		 *
-		 * @param string $title        The meta title for the current page.
-		 * @param int    $queried_object_id  The ID of the queried object.
-		 * @return string
-		 */
-		$title = apply_filters(
-			self::META_TITLE_FILTER,
-			'',
-			$queried_object_id
-		);
-
-		return esc_attr( (string) $title );
+	protected function filter(): string {
+		return self::META_TITLE_FILTER;
 	}
 }

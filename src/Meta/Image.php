@@ -35,12 +35,9 @@ class Image implements Registerable {
 	public function register(): void {
 		add_action( 'wp_head', array( $this, 'render' ), self::RENDER_PRIORITY );
 
-		array_map(
-			function ( $filter ) {
-				add_action( $filter, array( $this, 'add_image' ) );
-			},
-			self::SEO_PLUGIN_FILTER
-		);
+		foreach ( self::SEO_PLUGIN_FILTER as $hook ) {
+			add_action( $hook, array( $this, 'add_image' ) );
+		}
 	}
 
 	/**
@@ -83,8 +80,11 @@ class Image implements Registerable {
 		}
 
 		printf( '<meta property="og:image" content="%s" />' . PHP_EOL, esc_url( $image['url'] ) );
-		printf( '<meta property="og:image:width" content="%d" />' . PHP_EOL, esc_attr( strval( $image['width'] ) ) );
-		printf( '<meta property="og:image:height" content="%d" />' . PHP_EOL, esc_attr( strval( $image['height'] ) ) );
+		foreach ( array( 'width', 'height' ) as $key ) {
+			if ( (int) $image[ $key ] > 0 ) {
+				printf( '<meta property="og:image:%s" content="%d" />' . PHP_EOL, $key, (int) $image[ $key ] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Fixed key and integer.
+			}
+		}
 	}
 
 	/**

@@ -83,11 +83,10 @@ Missing keys are filled with defaults; an empty `url` means no image.
 ```php
 add_filter( 'lloc_seo_meta_image', function ( array $image, int $object_id ): array {
 	$attachment_id = get_post_thumbnail_id( $object_id );
-	if ( ! $attachment_id ) {
+	$src           = $attachment_id ? wp_get_attachment_image_src( $attachment_id, 'large' ) : false;
+	if ( ! $src ) {
 		return $image;
 	}
-
-	$src = wp_get_attachment_image_src( $attachment_id, 'large' );
 
 	return array(
 		'url'    => $src[0],
@@ -98,7 +97,8 @@ add_filter( 'lloc_seo_meta_image', function ( array $image, int $object_id ): ar
 }, 10, 2 );
 ```
 
-Without an SEO plugin, it prints `og:image`, `og:image:width` and `og:image:height` in `wp_head`.
+Without an SEO plugin, it prints `og:image` in `wp_head`, plus `og:image:width` and `og:image:height` when they
+are greater than 0.
 
 ### SEO plugin support
 
@@ -126,7 +126,7 @@ set separately.
 - the RSD link (points to `xmlrpc.php`),
 - the Windows Live Writer manifest link,
 - the WordPress version (generator tag and feeds),
-- the emoji detection script and styles (front end and admin).
+- the emoji detection script and styles.
 
 ### Check for SEO plugins
 
