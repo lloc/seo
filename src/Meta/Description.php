@@ -20,7 +20,18 @@ class Description extends Information implements Registerable {
 
 	public const META_DESCRIPTION_FILTER = 'lloc_seo_meta_description';
 
-	public const RENDER_PRIORITY = 1;
+	public const RENDER_PRIORITY = 2;
+
+	public const SEO_PLUGIN_FILTER = array(
+		'wpseo_metadesc',                          // Yoast SEO.
+		'wpseo_opengraph_desc',                    // Yoast SEO.
+		'wpseo_twitter_description',               // Yoast SEO.
+		'rank_math/frontend/description',          // Rank Math.
+		'rank_math/opengraph/facebook/og_description', // Rank Math.
+		'rank_math/opengraph/twitter/twitter_description', // Rank Math.
+		'aioseo_description',                      // All in One SEO.
+		'seopress_titles_desc',                    // SEOPress.
+	);
 
 	/**
 	 * @inheritdoc
@@ -29,9 +40,15 @@ class Description extends Information implements Registerable {
 	public function register(): void {
 		add_action( 'wp_head', array( $this, 'render' ), self::RENDER_PRIORITY );
 
-		add_filter( 'wpseo_metadesc', array( $this, 'fill' ) );
-		add_filter( 'wpseo_opengraph_desc', array( $this, 'fill' ) );
-		add_filter( 'wpseo_twitter_description', array( $this, 'fill' ) );
+		array_map(
+			function ( $filter ) {
+				add_filter( $filter, array( $this, 'fill' ) );
+			},
+			self::SEO_PLUGIN_FILTER
+		);
+
+		// The SEO Framework passes $args when it asks for another object.
+		add_filter( 'the_seo_framework_custom_field_description', array( $this, 'fill_current' ), 10, 2 );
 	}
 
 	/**

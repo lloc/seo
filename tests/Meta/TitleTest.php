@@ -12,7 +12,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \lloc\SEO\Meta\Title
- * @covers \lloc\SEO\Meta\Meta
+ * @covers \lloc\SEO\Meta\Information
+ * @uses   \lloc\SEO\Helper\Plugins
  */
 final class TitleTest extends TestCase {
 
@@ -37,28 +38,42 @@ final class TitleTest extends TestCase {
 
 	public static function hook_provider(): array {
 		return array(
-			'wpseo_title'           => array( 'wpseo_title' ),
-			'wpseo_opengraph_title' => array( 'wpseo_opengraph_title' ),
+			'wp_head'                                   => array( 'has_action', 'wp_head', 'render', Title::RENDER_PRIORITY ),
+			'pre_get_document_title'                    => array( 'has_filter', 'pre_get_document_title', 'document_title', 10 ),
+			'wpseo_title'                               => array( 'has_filter', 'wpseo_title', 'fill', 10 ),
+			'wpseo_opengraph_title'                     => array( 'has_filter', 'wpseo_opengraph_title', 'fill', 10 ),
+			'rank_math/frontend/title'                  => array( 'has_filter', 'rank_math/frontend/title', 'fill', 10 ),
+			'rank_math/opengraph/facebook/og_title'     => array( 'has_filter', 'rank_math/opengraph/facebook/og_title', 'fill', 10 ),
+			'rank_math/opengraph/twitter/twitter_title' => array( 'has_filter', 'rank_math/opengraph/twitter/twitter_title', 'fill', 10 ),
+			'aioseo_title'                              => array( 'has_filter', 'aioseo_title', 'fill', 10 ),
+			'seopress_titles_title'                     => array( 'has_filter', 'seopress_titles_title', 'fill', 10 ),
+			'the_seo_framework_title_from_custom_field' => array( 'has_filter', 'the_seo_framework_title_from_custom_field', 'fill_current', 10 ),
 		);
 	}
 
 	/**
 	 * @dataProvider hook_provider
 	 *
-	 * @param string $hook
+	 * @param callable $has
+	 * @param string   $hook
+	 * @param string   $method
+	 * @param int      $priority
 	 */
-	public function test_register_adds_hook( string $hook ): void {
+	public function test_register_adds_hook( callable $has, string $hook, string $method, int $priority ): void {
 		$test = new Title();
 		$test->register();
 
-		$this->assertSame( 10, has_filter( $hook, array( $test, 'fill' ) ) );
+		$this->assertSame( $priority, $has( $hook, array( $test, $method ) ) );
 	}
 
-	public function test_register_adds_document_title_hook(): void {
-		$test = new Title();
-		$test->register();
+	public function test_fill_current(): void {
+		$this->filtered( 'Ours' );
 
-		$this->assertSame( 10, has_filter( 'pre_get_document_title', array( $test, 'document_title' ) ) );
+		$this->assertSame( 'Ours', ( new Title() )->fill_current( '', null ) );
+	}
+
+	public function test_fill_current_skips_other_objects(): void {
+		$this->assertSame( '', ( new Title() )->fill_current( '', array( 'id' => 7 ) ) );
 	}
 
 	public function test_document_title(): void {
@@ -120,5 +135,36 @@ final class TitleTest extends TestCase {
 		$this->filtered( $ours );
 
 		$this->assertSame( $expected, ( new Title() )->fill( $yoast ) );
+	}
+
+	public static function render_provider(): array {
+		return array(
+			'filtered' => array( 'Impressum', '<meta property="og:title" content="Impressum" />' . PHP_EOL ),
+			'empty'    => array( '', '' ),
+		);
+	}
+
+	/**
+	 * @dataProvider render_provider
+	 *
+	 * @param string $filtered
+	 * @param string $expected
+	 */
+	public function test_render( string $filtered, string $expected ): void {
+		$this->filtered( $filtered );
+
+		$this->expectOutputString( $expected );
+		( new Title() )->render();
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 * @preserveGlobalState  disabled
+	 */
+	public function test_render_prints_nothing_with_seo_plugin(): void {
+		define( 'WPSEO_VERSION', '1.0' );
+
+		$this->expectOutputString( '' );
+		( new Title() )->render();
 	}
 }

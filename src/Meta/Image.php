@@ -20,7 +20,13 @@ class Image implements Registerable {
 
 	public const META_IMAGE_FILTER = 'lloc_seo_meta_image';
 
-	public const RENDER_PRIORITY = 2;
+	public const RENDER_PRIORITY = 3;
+
+	public const SEO_PLUGIN_FILTER = array(
+		'wpseo_add_opengraph_images',                           // Yoast SEO.
+		'rank_math/opengraph/facebook/add_additional_images',   // Rank Math.
+		'rank_math/opengraph/twitter/add_additional_images',    // Rank Math.
+	);
 
 	/**
 	 * @inheritdoc
@@ -29,17 +35,22 @@ class Image implements Registerable {
 	public function register(): void {
 		add_action( 'wp_head', array( $this, 'render' ), self::RENDER_PRIORITY );
 
-		add_action( 'wpseo_add_opengraph_images', array( $this, 'add_yoast_image' ) );
+		array_map(
+			function ( $filter ) {
+				add_action( $filter, array( $this, 'add_image' ) );
+			},
+			self::SEO_PLUGIN_FILTER
+		);
 	}
 
 	/**
-	 * Add the share image if Yoast has none for the page.
+	 * Add the share image if Yoast or Rank Math has none for the page.
 	 *
-	 * @param object $images Yoast image container.
+	 * @param object $images Yoast or Rank Math image container, both offer add_image() and has_images().
 	 *
 	 * @return void
 	 */
-	public function add_yoast_image( $images ): void {
+	public function add_image( $images ): void {
 		if ( ! method_exists( $images, 'add_image' ) ) {
 			return;
 		}

@@ -37,10 +37,16 @@ final class DescriptionTest extends TestCase {
 
 	public static function hook_provider(): array {
 		return array(
-			'wp_head'                   => array( 'has_action', 'wp_head', 'render', 1 ),
-			'wpseo_metadesc'            => array( 'has_filter', 'wpseo_metadesc', 'fill', 10 ),
-			'wpseo_opengraph_desc'      => array( 'has_filter', 'wpseo_opengraph_desc', 'fill', 10 ),
-			'wpseo_twitter_description' => array( 'has_filter', 'wpseo_twitter_description', 'fill', 10 ),
+			'wp_head'                                     => array( 'has_action', 'wp_head', 'render', Description::RENDER_PRIORITY ),
+			'wpseo_metadesc'                              => array( 'has_filter', 'wpseo_metadesc', 'fill', 10 ),
+			'wpseo_opengraph_desc'                        => array( 'has_filter', 'wpseo_opengraph_desc', 'fill', 10 ),
+			'wpseo_twitter_description'                   => array( 'has_filter', 'wpseo_twitter_description', 'fill', 10 ),
+			'rank_math/frontend/description'              => array( 'has_filter', 'rank_math/frontend/description', 'fill', 10 ),
+			'rank_math/opengraph/facebook/og_description' => array( 'has_filter', 'rank_math/opengraph/facebook/og_description', 'fill', 10 ),
+			'rank_math/opengraph/twitter/twitter_description' => array( 'has_filter', 'rank_math/opengraph/twitter/twitter_description', 'fill', 10 ),
+			'aioseo_description'                          => array( 'has_filter', 'aioseo_description', 'fill', 10 ),
+			'seopress_titles_desc'                        => array( 'has_filter', 'seopress_titles_desc', 'fill', 10 ),
+			'the_seo_framework_custom_field_description'  => array( 'has_filter', 'the_seo_framework_custom_field_description', 'fill_current', 10 ),
 		);
 	}
 
@@ -78,30 +84,6 @@ final class DescriptionTest extends TestCase {
 		$this->filtered( $filtered );
 
 		$this->assertSame( $expected, ( new Description() )->value() );
-	}
-
-	public static function fill_provider(): array {
-		return array(
-			'keeps existing'         => array( 'From Yoast', 'Ours', 'From Yoast' ),
-			'replaces whitespace'    => array( '  ', 'Ours', 'Ours' ),
-			'replaces empty'         => array( '', 'Ours', 'Ours' ),
-			'replaces non-string'    => array( false, 'Ours', 'Ours' ),
-			'falls back, ours empty' => array( false, '', false ),
-			'falls back, both empty' => array( '', '', '' ),
-		);
-	}
-
-	/**
-	 * @dataProvider fill_provider
-	 *
-	 * @param mixed  $yoast
-	 * @param string $ours
-	 * @param mixed  $expected
-	 */
-	public function test_fill( $yoast, string $ours, $expected ): void {
-		$this->filtered( $ours );
-
-		$this->assertSame( $expected, ( new Description() )->fill( $yoast ) );
 	}
 
 	public static function render_provider(): array {

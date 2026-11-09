@@ -52,8 +52,10 @@ final class ImageTest extends TestCase {
 
 	public static function hook_provider(): array {
 		return array(
-			'wp_head'                    => array( 'has_action', 'wp_head', 'render', 2 ),
-			'wpseo_add_opengraph_images' => array( 'has_action', 'wpseo_add_opengraph_images', 'add_yoast_image', 10 ),
+			'wp_head'                    => array( 'has_action', 'wp_head', 'render', Image::RENDER_PRIORITY ),
+			'wpseo_add_opengraph_images' => array( 'has_action', 'wpseo_add_opengraph_images', 'add_image', 10 ),
+			'rank_math/opengraph/facebook/add_additional_images' => array( 'has_action', 'rank_math/opengraph/facebook/add_additional_images', 'add_image', 10 ),
+			'rank_math/opengraph/twitter/add_additional_images' => array( 'has_action', 'rank_math/opengraph/twitter/add_additional_images', 'add_image', 10 ),
 		);
 	}
 
@@ -155,27 +157,27 @@ final class ImageTest extends TestCase {
 		};
 	}
 
-	public function test_add_yoast_image(): void {
+	public function test_add_image(): void {
 		$this->filtered( self::IMAGE );
 
 		$images = $this->yoast_images( false );
-		( new Image() )->add_yoast_image( $images );
+		( new Image() )->add_image( $images );
 
 		$this->assertSame( array( self::IMAGE ), $images->added );
 	}
 
-	public function test_add_yoast_image_keeps_existing(): void {
+	public function test_add_image_keeps_existing(): void {
 		$images = $this->yoast_images( true );
-		( new Image() )->add_yoast_image( $images );
+		( new Image() )->add_image( $images );
 
 		$this->assertSame( array(), $images->added );
 	}
 
-	public function test_add_yoast_image_skips_empty(): void {
+	public function test_add_image_skips_empty(): void {
 		$this->filtered( array() );
 
 		$images = $this->yoast_images( false );
-		( new Image() )->add_yoast_image( $images );
+		( new Image() )->add_image( $images );
 
 		$this->assertSame( array(), $images->added );
 	}
