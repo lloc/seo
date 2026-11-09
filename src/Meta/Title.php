@@ -17,8 +17,7 @@ final class Title extends Meta {
 	public const META_TITLE_FILTER = 'lloc_seo_meta_title';
 
 	/**
-	 * Hook into wp_head.
-	 *
+	 * @inheritdoc
 	 * @return void
 	 */
 	public function register(): void {
